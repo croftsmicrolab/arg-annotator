@@ -1,0 +1,180 @@
+project:
+  name: arg-annotator
+  sample: sample
+  root: .
+  config_file: config/config.yaml
+inputs:
+  fasta: raw/sequences.fasta
+outputs:
+  root: results
+  normalized_fasta: results/00_input/normalized.fasta
+  id_mapping: results/00_input/id_mapping.tsv
+  sequence_qc: results/00_input/sequence_qc.tsv
+  insert_db_prefix: results/01_insert_clusters/db/insert_db
+  insert_cluster_db_prefix: results/01_insert_clusters/db/insert_cluster
+  insert_rep_db_prefix: results/01_insert_clusters/db/insert_representatives
+  insert_tmp_dir: results/01_insert_clusters/tmp
+  insert_cluster_members: results/01_insert_clusters/insert_cluster_members.tsv
+  insert_cluster_summary: results/01_insert_clusters/insert_cluster_summary.tsv
+  insert_representatives: results/01_insert_clusters/insert_representatives.fasta
+  insert_cluster_distribution_data: results/07_plots/raw_sequence_cluster_rank.tsv
+  insert_cluster_distribution_png: results/07_plots/raw_sequence_cluster_rank.png
+  insert_cluster_distribution_svg: results/07_plots/raw_sequence_cluster_rank.svg
+  predicted_orfs_fna: results/02_orfs/predicted_orfs.fna
+  predicted_proteins_faa: results/02_orfs/predicted_proteins.faa
+  predicted_orfs_gff: results/02_orfs/predicted_orfs.gff
+  orf_db_prefix: results/03_orf_clusters/db/orf_db
+  orf_cluster_db_prefix: results/03_orf_clusters/db/orf_cluster
+  orf_rep_db_prefix: results/03_orf_clusters/db/orf_representatives
+  orf_tmp_dir: results/03_orf_clusters/tmp
+  orf_cluster_members: results/03_orf_clusters/orf_cluster_members.tsv
+  orf_cluster_summary: results/03_orf_clusters/orf_cluster_summary.tsv
+  representative_orfs_fna: results/03_orf_clusters/representative_orfs.fna
+  reporf_support: results/03_orf_clusters/reporf_support.tsv
+  orf_to_insert_mapping: results/03_orf_clusters/orf_to_insert_mapping.tsv
+  missing_mappings: results/03_orf_clusters/missing_mappings.tsv
+  reporf_support_distribution_data: results/07_plots/weighted_reporf_rank.tsv
+  reporf_support_distribution_png: results/07_plots/weighted_reporf_rank.png
+  reporf_support_distribution_svg: results/07_plots/weighted_reporf_rank.svg
+  selection_summary: results/04_candidates/selection_summary.tsv
+  primary_table: results/04_candidates/primary_candidates.tsv
+  primary_ids: results/04_candidates/primary_candidate_ids.txt
+  primary_fna: results/04_candidates/primary_candidates.fna
+  primary_faa: results/04_candidates/primary_candidates.faa
+  primary_rgi_faa: results/04_candidates/primary_candidates.rgi.faa
+  exploratory_support1_table: results/04_candidates/exploratory_support1_reporfs.tsv
+  exploratory_support1_ids: results/04_candidates/exploratory_support1_ids.txt
+  exploratory_support1_fna: results/04_candidates/exploratory_support1_reporfs.fna
+  exploratory_support1_faa: results/04_candidates/exploratory_support1_reporfs.faa
+  diamond_hits: results/05_annotations/swissprot/diamond_hits.tsv
+  rgi_prefix: results/05_annotations/rgi/rgi
+  rgi_txt: results/05_annotations/rgi/rgi.txt
+  rgi_json: results/05_annotations/rgi/rgi.json
+  candidate_annotations: results/05_annotations/candidate_annotations.tsv
+  annotation_summary: results/05_annotations/annotation_summary.tsv
+  validation_checks: results/06_validation/validation_checks.tsv
+  effective_config: results/logs/effective_config.yaml
+  software_versions: results/logs/software_versions.txt
+  input_manifest: results/logs/input_manifest.tsv
+  prepare_log: results/logs/prepare_input.log
+  insert_createdb_log: results/logs/insert_createdb.log
+  insert_cluster_log: results/logs/insert_cluster.log
+  insert_members_log: results/logs/insert_members.log
+  insert_representatives_log: results/logs/insert_representatives.log
+  prodigal_stdout_log: results/logs/prodigal.stdout.log
+  prodigal_stderr_log: results/logs/prodigal.stderr.log
+  orf_createdb_log: results/logs/orf_createdb.log
+  orf_cluster_log: results/logs/orf_cluster.log
+  orf_members_log: results/logs/orf_members.log
+  orf_representatives_log: results/logs/orf_representatives.log
+  support_log: results/logs/support.log
+  selection_log: results/logs/selection.log
+  diamond_log: results/logs/diamond.log
+  rgi_stdout_log: results/logs/rgi.stdout.log
+  rgi_stderr_log: results/logs/rgi.stderr.log
+  merge_log: results/logs/merge_annotations.log
+  validation_log: results/logs/validation.log
+  insert_distribution_log: results/logs/insert_cluster_distribution.log
+  support_distribution_log: results/logs/reporf_support_distribution.log
+  xdg_cache_dir: results/logs/cache
+  matplotlib_cache_dir: results/logs/matplotlib
+  insert_cluster_distribution_pdf: results/07_plots/raw_sequence_cluster_rank.pdf
+  reporf_support_distribution_pdf: results/07_plots/weighted_reporf_rank.pdf
+tools:
+  python: python
+  snakemake: snakemake
+  mmseqs: mmseqs
+  prodigal: prodigal
+  diamond: diamond
+  rgi: rgi
+  conda: conda
+databases:
+  swissprot_diamond: databases/swissprot/uniprot_sprot.dmnd
+  rgi_working_directory: databases/rgi
+  rgi_local_database: databases/rgi/localDB
+resources:
+  default_threads: 8
+  mmseqs_threads: 8
+  diamond_threads: 8
+  rgi_threads: 8
+plots:
+  dpi: 300
+  line_color: '#2C7FB8'
+qc:
+  allowed_nucleotide_symbols: ACGTN
+  fasta_line_width: 80
+  fail_on_invalid_bases: true
+  fail_on_empty_sequences: true
+insert_clustering:
+  min_sequence_identity: 0.99
+  coverage: 0.99
+  coverage_mode: 0
+  cluster_mode: 0
+orf_prediction:
+  mode: meta
+  output_format: gff
+orf_clustering:
+  min_sequence_identity: 0.99
+  coverage: 0.8
+  coverage_mode: 1
+  cluster_mode: 2
+selection:
+  nominal_fraction: 0.05
+  rounding: ceiling
+  ranking_keys:
+  - support descending
+  - ORF-cluster member count descending
+  - RepORF ID ascending
+  retain_all_support_one_as_exploratory: true
+  mode: top_fraction
+  minimum_support: 2
+annotation:
+  rgi:
+    input_type: protein
+    aligner: DIAMOND
+    include_loose: true
+    low_quality: true
+    local: true
+    clean: true
+    enabled: true
+  swissprot:
+    mode: sensitive
+    evalue: 0.001
+    max_target_sequences: 25
+    output_fields:
+    - qseqid
+    - sseqid
+    - pident
+    - length
+    - mismatch
+    - gapopen
+    - qstart
+    - qend
+    - sstart
+    - send
+    - evalue
+    - bitscore
+    - qlen
+    - slen
+    - qcovhsp
+    - scovhsp
+    - stitle
+    enabled: true
+  evidence_thresholds:
+    medium_identity: 40
+    medium_query_coverage: 60
+    low_identity: 25
+    low_query_coverage: 30
+  retain:
+    loose_card_hits: true
+    low_similarity_homologs: true
+    very_remote_homologs: true
+    hypothetical_or_uncharacterized: true
+    partial_orfs: true
+    no_hit_candidates: true
+validation:
+  expected_input_sequences: 0
+  expected_insert_clusters: 0
+  expected_predicted_orfs: 0
+  expected_reporfs: 0
+  expected_primary_candidates: 0

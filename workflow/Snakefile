@@ -1,0 +1,98 @@
+from pathlib import Path
+import shutil
+import sys
+import yaml
+
+WORKFLOW_DIR = Path(workflow.basedir).resolve()
+REPO_ROOT = WORKFLOW_DIR.parent
+configfile: str(REPO_ROOT / "config/config.yaml")
+
+PROJECT_ROOT = Path(config.get("project", {}).get("root", "."))
+if not PROJECT_ROOT.is_absolute():
+    PROJECT_ROOT = (REPO_ROOT / PROJECT_ROOT).resolve()
+
+def project_path(value):
+    path = Path(str(value)).expanduser()
+    return str(path.resolve() if path.is_absolute() else (PROJECT_ROOT / path).resolve())
+
+def output_path(key):
+    path = Path(config["outputs"][key])
+    override = config.get("run", {}).get("output_root")
+    if override:
+        root = Path(config["outputs"]["root"])
+        path = Path(override) if key == "root" else Path(override) / path.relative_to(root)
+    return project_path(path)
+
+def input_path(key):
+    return project_path(config["inputs"][key])
+
+def database_path(key):
+    return project_path(config["databases"][key])
+
+def tool(key):
+    value = config.get("tools", {}).get(key, key)
+    if key == "python" and value == "python":
+        return sys.executable
+    resolved = shutil.which(value)
+    if not resolved and Path(value).is_file():
+        resolved = str(Path(value).resolve())
+    if not resolved:
+        if key == "conda":
+            return "conda"
+        raise ValueError(f"Executable {value!r} not found. Activate the arg-annotator Conda environment.")
+    return resolved
+
+def script(name):
+    return str(WORKFLOW_DIR / "scripts" / name)
+
+def dbtype(prefix_key):
+    return output_path(prefix_key) + ".dbtype"
+
+OUTPUT_ROOT = Path(output_path("root"))
+RGI_WORKDIR = Path(database_path("rgi_working_directory"))
+RGI_DATABASE = Path(database_path("rgi_local_database"))
+RGI_ENABLED = bool(config["annotation"]["rgi"]["enabled"])
+SWISS_ENABLED = bool(config["annotation"]["swissprot"]["enabled"])
+if RGI_ENABLED and not (RGI_DATABASE / "card.json").is_file():
+    raise ValueError("CARD is not prepared. Run python scripts/setup_databases.py; see docs/DATABASES.md.")
+if RGI_ENABLED and RGI_DATABASE != RGI_WORKDIR / "localDB":
+    raise ValueError("RGI local database must be <rgi_working_directory>/localDB")
+if config["annotation"]["rgi"]["input_type"] != "protein" or not config["annotation"]["rgi"]["local"] or config["annotation"]["rgi"]["aligner"] != "DIAMOND":
+    raise ValueError("This workflow annotates protein queries using an RGI local database; retain input_type: protein and local: true")
+if SWISS_ENABLED and not Path(database_path("swissprot_diamond")).is_file():
+    raise ValueError("Swiss-Prot is not prepared. Run python scripts/setup_databases.py; see docs/DATABASES.md.")
+if config["selection"]["mode"] not in {"top_fraction", "minimum_support"}:
+    raise ValueError("selection.mode must be top_fraction or minimum_support")
+if not 0 < float(config["selection"]["nominal_fraction"]) <= 1:
+    raise ValueError("selection.nominal_fraction must be in (0, 1]")
+if int(config["selection"]["minimum_support"]) < 2:
+    raise ValueError("selection.minimum_support must be at least 2")
+if config["annotation"]["swissprot"]["mode"] not in {"fast", "sensitive", "more-sensitive", "very-sensitive", "ultra-sensitive"}:
+    raise ValueError("Unsupported DIAMOND sensitivity mode")
+
+rule all:
+    input:
+        output_path("candidate_annotations"),
+        output_path("annotation_summary"),
+        output_path("insert_cluster_distribution_data"),
+        output_path("insert_cluster_distribution_png"),
+        output_path("insert_cluster_distribution_svg"),
+        output_path("insert_cluster_distribution_pdf"),
+        output_path("reporf_support_distribution_data"),
+        output_path("reporf_support_distribution_png"),
+        output_path("reporf_support_distribution_svg"),
+        output_path("reporf_support_distribution_pdf"),
+        output_path("validation_checks"),
+        output_path("effective_config"),
+        output_path("software_versions"),
+        output_path("input_manifest")
+
+include: "rules/metadata.smk"
+include: "rules/qc.smk"
+include: "rules/insert_clustering.smk"
+include: "rules/orfs.smk"
+include: "rules/orf_clustering.smk"
+include: "rules/selection.smk"
+include: "rules/annotation.smk"
+include: "rules/plots.smk"
+include: "rules/validation.smk"
