@@ -9,10 +9,6 @@ Both raw insert-cluster and weighted RepORF rank curves are generated automatica
 
 ![Manuscript workflow](docs/assets/manuscript_pipeline.png)
 
-[Download the workflow figure as PDF](docs/assets/manuscript_pipeline.pdf).
-The original manuscript figure also includes BLASTN, phylogenetic analysis and
-experimental validation, which are outside this automated workflow.
-
 ## Quick start
 
 Use Linux or macOS with Miniforge/Conda; on Windows use WSL2. MMseqs nucleotide
