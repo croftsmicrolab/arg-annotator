@@ -120,5 +120,8 @@ Swiss-Prot search settings.
 - [Database preparation and versions](docs/DATABASES.md)
 - [Methods and selection definition](docs/METHODS.md)
 
-Software version: 0.1.0. See [CITATION.cff](CITATION.cff) for citation metadata.
-Add the paper's bibliographic information when it is published.
+Software version: 0.1.0. If you use this pipeline, please cite the associated manuscript:
+
+> Yang, L., and Crofts, T. S. *Abundance-weighted analysis and deep functional metagenomic selection reveals unrecognized diversity of soil-derived streptothricin acetyltransferases*. Manuscript.
+
+See [CITATION.cff](CITATION.cff) for citation metadata.

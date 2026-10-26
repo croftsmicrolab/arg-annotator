@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "Please cite this software and the associated manuscript when available."
+message: "If you use this pipeline, please cite the associated manuscript using the metadata in preferred-citation."
 title: "ARG Annotator: abundance-weighted annotation of representative ORFs"
 type: software
 version: 0.1.0
@@ -7,3 +7,11 @@ repository-code: "https://github.com/croftsmicrolab/arg-annotator"
 authors:
   - name: "ARG Annotator contributors"
 abstract: "Insert clustering, ORF prediction, nucleotide ORF clustering, weighted support, candidate selection and CARD/Swiss-Prot annotation."
+preferred-citation:
+  type: unpublished
+  title: "Abundance-weighted analysis and deep functional metagenomic selection reveals unrecognized diversity of soil-derived streptothricin acetyltransferases"
+  authors:
+    - family-names: Yang
+      given-names: Lufan
+    - family-names: Crofts
+      given-names: Terence S.
